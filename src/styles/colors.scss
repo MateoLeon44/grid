@@ -1,0 +1,9 @@
+$secondary-color: rgb(51, 73, 104);
+$primary-color: rgb(244, 241, 238);
+$tertiary-color: rgb(159, 95, 39);
+
+:root {
+  --primary-color: $primary-color;
+  --secondary-color: $secondary-color;
+  --tertiary-color: $tertiary-color;
+}

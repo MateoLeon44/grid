@@ -1,0 +1,16 @@
+{
+  "include": [
+    "src",
+    "__tests__/*",
+    "__tests__/unit/components/table/PaginatedTable.test.ts"
+  ],
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
