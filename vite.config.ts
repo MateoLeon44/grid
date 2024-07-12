@@ -5,7 +5,6 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base: '/grid/',
   css: {
     preprocessorOptions: {
       scss: {
@@ -23,5 +22,12 @@ export default defineConfig({
   },
   build: {
     minify: true,
+    target: 'esnext',
+    outDir: 'dist',
+    lib: {
+      entry: path.resolve(__dirname, 'src/main.ts'),
+      fileName: 'index',
+      formats: ['es', 'cjs'],
+    },
   },
 })
