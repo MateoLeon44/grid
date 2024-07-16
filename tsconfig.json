@@ -5,6 +5,8 @@
     "__tests__/unit/components/table/PaginatedTable.test.ts"
   ],
   "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
     "noEmit": true,
     "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types"],
