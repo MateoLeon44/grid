@@ -4,48 +4,31 @@
       <slot name="header"></slot>
     </div>
     <div class="grid-body">
-      <table>
-        <thead>
-          <tr>
-            <th v-for="(column, index) in columnLabels" :key="column">
-              <span class="grid-header" @click="sort(index)">
-                {{ column }}
-                <span v-show="sortField === index && sortOrder === 'asc'">
-                  &#x25B2;
-                </span>
-                <span v-show="sortField === index && sortOrder === 'desc'">
-                  &#x25BC;
-                </span>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            :class="{ active: selectedRows.has(index) }"
-            v-for="(row, index) in tableData"
-            :key="row.id"
-            @click="openRow(row, index)"
-          >
-            <td v-for="column in row" :key="column">
-              {{ Array.isArray(column) ? column.join(', ') : column }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <Pagination
-        :total-pages="totalPages"
-        @handle-page-navigation="handlePageNavigation"
-      />
+      <!-- No need of creating a store or anything related to prop drilling since there aren't many nested components -->
+      <Table
+        :active-highlight="activeHighlight"
+        :table-data="tableData"
+        :default-sort-order="defaultSortOrder"
+        :default-sort-field="defaultSortField"
+        :column-labels="columnLabels"
+        @on-row-click="emitRowClick"
+        @on-sort-values="emitSortValues"
+      ></Table>
     </div>
+    <Pagination
+      :total-pages="totalPages"
+      @handle-page-navigation="handlePageNavigation"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue'
 import Pagination from '@/components/table/Pagination.vue'
+import Table from '@/components/table/Table.vue'
 
 export default defineComponent({
+  components: { Table, Pagination },
   props: {
     tableData: {
       type: undefined,
@@ -75,45 +58,37 @@ export default defineComponent({
       type: Number,
       default: 1,
     },
-    selectedRows: {
-      type: Set,
-      default: new Set(),
+    activeHighlight: {
+      type: Function,
+      default: () => undefined,
     },
   },
-  components: { Pagination },
-  emits: ['onSortValues', 'handlePageNavigation', 'onRowOpen'],
+  emits: ['onSortValues', 'handlePageNavigation', 'onRowClick'],
   setup(props, { emit }) {
-    const sortField = ref<number>(0)
-    const sortOrder = ref<string>(props.defaultSortOrder)
     const currentPage = ref(1)
 
     const handlePageNavigation = (pageNumber) => {
       emit('handlePageNavigation', pageNumber)
     }
 
-    const openRow = (row: object, index: number) => {
-      emit('onRowOpen', { row, index })
+    const emitRowClick = (data) => {
+      emit('onRowClick', data)
     }
 
-    const sort = (field: number) => {
-      sortField.value = field
-      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-      const direction = sortOrder.value === 'asc' ? 1 : -1
-
-      emit('onSortValues', { value: field, direction })
+    const emitSortValues = (data) => {
+      emit('onSortValues', data)
     }
 
     return {
-      sortField,
-      sortOrder,
-      sort,
       currentPage,
       handlePageNavigation,
-      openRow,
+      emitRowClick,
+      emitSortValues,
     }
   },
 })
 </script>
+
 <style lang="scss" scoped>
 .grid-container {
   display: flex;
@@ -121,9 +96,12 @@ export default defineComponent({
   width: 100%;
 }
 
-.grid-header,
+.grid-header {
+  width: 100%;
+}
+
 .grid-body {
-  flex: 1;
+  height: 400px;
   width: 100%;
   overflow-x: auto;
   overflow-y: auto;
@@ -131,32 +109,5 @@ export default defineComponent({
 
 .grid-header {
   display: flex;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  height: 300px;
-}
-
-th,
-td {
-  text-align: left;
-  width: 100px;
-  max-width: 100px;
-  white-space: normal;
-  word-wrap: break-word;
-  border-bottom: 1px solid #ddd;
-  padding: 3px;
-}
-
-th,
-tr {
-  cursor: pointer;
-}
-
-.active {
-  background-color: $tertiary-color;
-  color: $primary-color;
 }
 </style>

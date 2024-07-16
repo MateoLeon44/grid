@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar" :class="{ show: isOpen }">
-    <div class="sidebar_overlay" @click="closePanel">
+    <div class="sidebar_overlay">
       <div class="sidebar_panel_content">
         <component :is="component" :data="data" />
       </div>

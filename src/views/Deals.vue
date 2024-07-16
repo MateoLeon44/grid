@@ -4,10 +4,11 @@
     :column-labels="columnLabels"
     :items-per-page="itemsPerPage"
     :total-pages="totalPages"
-    :selected-rows="selectedRows"
+    :row-identifier="'id'"
+    :active-highlight="isRowSelected"
     @on-sort-values="sortValues"
     @handle-page-navigation="changeCurrentPage"
-    @on-row-open="handleOpenPanel"
+    @on-row-click="handleOpenPanel"
   >
     <template #header>
       <div class="deals-header">
@@ -53,16 +54,21 @@ export default defineComponent({
      * This could be a constant since it won't change
      * However, a prod environment with information in the backend would make this reactive
      * So I'll let it with a ref
+     *
      */
     const data = ref<Deal[]>(MOCK_DATA.data)
     const selectedRows = ref<Set<number>>(new Set())
 
-    const handleOpenPanel = ({ index }) => {
-      if (selectedRows.value.has(index)) {
-        selectedRows.value.delete(index)
+    const isRowSelected = (row) => {
+      return selectedRows.value.has(row.id)
+    }
+
+    const handleOpenPanel = ({ row }) => {
+      if (selectedRows.value.has(row.id)) {
+        selectedRows.value.delete(row.id)
         return
       }
-      selectedRows.value.add(index)
+      selectedRows.value.add(row.id)
       if (selectedRows.value.size > 1) {
         closePanel()
         return
@@ -71,7 +77,12 @@ export default defineComponent({
 
     watch(selectedRows.value, (newVal, oldVal) => {
       if (newVal.size === 1) {
-        openPanel('DataDisplayPane', data.value[newVal.values().next().value])
+        openPanel('DataDisplayPane', {
+          labels: MOCK_DATA.labels,
+          deal: data.value.filter(
+            (obj) => obj.id === newVal.values().next().value,
+          )[0],
+        })
         return
       }
       if (newVal.size === 0) {
@@ -124,6 +135,8 @@ export default defineComponent({
      * This is a workaround on how it would usually work.
      * I'd recommend that the backend gives only the data from that page and the next page.
      * We usually don't want to receive 10 million data just from doing one request
+     *
+     * TODO: Add missing loading component when we get the data and also when we sort/filter data
      */
     const displayedData = computed(() => {
       const startIndex = (currentPage.value - 1) * itemsPerPage.value
@@ -134,14 +147,8 @@ export default defineComponent({
       return filteredData.value.slice(startIndex, endIndex)
     })
 
-    const restartSelected = () => {
-      closePanel()
-      selectedRows.value.clear()
-    }
-
     const changeCurrentPage = (page: number) => {
       currentPage.value = page
-      restartSelected()
     }
 
     const columns = ref<string[]>(Object.keys(data.value[0] || {}))
@@ -164,6 +171,7 @@ export default defineComponent({
       data,
       handleOpenPanel,
       selectedRows,
+      isRowSelected,
     }
   },
 })
