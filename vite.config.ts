@@ -20,7 +20,6 @@ export default defineConfig({
       },
     ],
   },
-  base: '/grid/',
   build: {
     minify: true,
     target: 'esnext',
