@@ -24,10 +24,5 @@ export default defineConfig({
     minify: true,
     target: 'esnext',
     outDir: 'dist',
-    lib: {
-      entry: path.resolve(__dirname, 'src/main.ts'),
-      fileName: 'index',
-      formats: ['es', 'cjs'],
-    },
   },
 })
